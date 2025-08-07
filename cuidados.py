@@ -16,36 +16,7 @@ if "token_processado" not in st.session_state:
 if "usuario" not in st.session_state:
     st.session_state["usuario"] = None
 
-# --- Campo oculto para receber o token via JS ---
-token_input = st.text_input("token", key="token_input", label_visibility="visible")
-st.markdown("""
-<style>
-input[aria-label="token"] {
-  visibility: hidden;
-  height: 0px;
-}
-</style>
-""", unsafe_allow_html=True)
-
-import streamlit.components.v1 as components
-components.html("""
-<script>
-  const fragment = window.location.hash;
-  if (fragment.includes("access_token")) {
-    const params = new URLSearchParams(fragment.slice(1));
-    const token = params.get("access_token");
-    if (token) {
-      // Redireciona para a mesma página, mas com o token como parâmetro na URL
-      window.location.href = window.location.pathname + "?token=" + token;
-    }
-  }
-</script>
-""", height=0)
-
-# --- DEBUG ---
-st.write("DEBUG:", dict(st.session_state))
-
-# Captura o token da query string
+# Captura o token da query string (mantém para compatibilidade, mas não será usado)
 params = st.query_params
 token = params.get("token", [None])[0] if "token" in params else None
 
@@ -55,57 +26,41 @@ if token and not st.session_state.get("token_processado", False):
         st.session_state["access_token"] = token
         st.session_state["usuario"] = session.user
         st.session_state["token_processado"] = True
-        st.query_params.clear()  # Limpa a query string
+        st.query_params.clear()
         st.experimental_rerun()
     except Exception as e:
         st.error(f"Erro ao autenticar com token: {e}")
         st.stop()
 
-# ✅ Processa o token se ainda não foi processado
-if st.session_state["token_input"] and not st.session_state["token_processado"]:
-    try:
-        session = supabase.auth.set_session(st.session_state["token_input"], "")
-        st.session_state["access_token"] = st.session_state["token_input"]
-        st.session_state["usuario"] = session.user
-        st.session_state["token_processado"] = True
-        st.experimental_rerun()
-    except Exception as e:
-        st.error(f"Erro ao autenticar com token: {e}")
-        st.stop()
-
-# ✅ Se ainda não processou o token, aguarde
-if not st.session_state["token_processado"] and st.session_state["token_input"]:
-    st.info("🔄 Processando login...")
-    st.stop()
-
-# --- Função de login ---
+# --- Função de login com cadastro ---
 def login_page():
     st.title("🔐 Login no Sistema de Cuidados")
-    tipo_login = st.radio("Escolha o método de login:", ["E-mail e senha", "Google", "Facebook"])
-    if tipo_login == "E-mail e senha":
+    aba = st.radio("Acesso:", ["Entrar", "Cadastrar novo usuário"])
+
+    if aba == "Entrar":
         email = st.text_input("E-mail")
         senha = st.text_input("Senha", type="password")
         if st.button("Entrar"):
             try:
                 result = supabase.auth.sign_in_with_password({"email": email, "password": senha})
                 st.session_state["usuario"] = result.user
-                st.session_state["token_processado"] = True  # <-- Adicione isso!
+                st.session_state["token_processado"] = True
                 st.success("✅ Login realizado com sucesso!")
                 st.experimental_rerun()
             except Exception as e:
                 st.error("Erro ao fazer login: " + str(e))
-    elif tipo_login == "Google":
-        st.markdown(
-            "[🔗 Entrar com Google](https://dmatpfeiqddnfauxlhoh.supabase.co/auth/v1/authorize?provider=google&redirect_to=http://localhost:8501)",
-            unsafe_allow_html=True
-        )
-    elif tipo_login == "Facebook":
-        st.markdown(
-            "[🔗 Entrar com Facebook](https://dmatpfeiqddnfauxlhoh.supabase.co/auth/v1/authorize?provider=facebook&redirect_to=http://localhost:8501)",
-            unsafe_allow_html=True
-        )
 
-# ✅ Verificação de login
+    elif aba == "Cadastrar novo usuário":
+        novo_email = st.text_input("Novo e-mail")
+        nova_senha = st.text_input("Nova senha", type="password")
+        if st.button("Cadastrar"):
+            try:
+                result = supabase.auth.sign_up({"email": novo_email, "password": nova_senha})
+                st.success("✅ Usuário cadastrado! Verifique seu e-mail para ativar a conta.")
+            except Exception as e:
+                st.error("Erro ao cadastrar: " + str(e))
+
+# --- Verificação de login ---
 if st.session_state["usuario"] is None:
     login_page()
     st.stop()
