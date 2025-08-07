@@ -137,6 +137,8 @@ with abas[0]:
         st.markdown(f"🕒 Data do Registro: **{data}**")
 
         temperatura_str = st.text_input("Temperatura (°C)", placeholder="Ex: 36,5")
+        # ➕ Campo de saturação de oxigênio
+        saturacao = st.number_input("Saturação de oxigênio (%)", min_value=50, max_value=100, step=1)
         opcoes_sono = [f"{h}h {m}min" if m > 0 else f"{h}h" for h in range(3, 13) for m in [0, 30]]
         sono = st.selectbox("Horas de Sono", opcoes_sono)
         pressao = st.text_input("Pressão Arterial (ex: 120x80)")
@@ -169,6 +171,7 @@ with abas[0]:
                 novo_registro = {
                     "data": data,
                     "temperatura": temperatura,
+                    "saturacao": saturacao,  # ➕ Inclui saturação
                     "pressao": pressao,
                     "sono": sono,
                     "observacao": observacao,
