@@ -319,6 +319,3 @@ with abas[3]:
     else:
         st.info("Nenhum registro de alimentação ainda.")
 
-if st.button("Forçar token manual"):
-    st.session_state["token_input"] = "SEU_ACCESS_TOKEN_AQUI"
-
