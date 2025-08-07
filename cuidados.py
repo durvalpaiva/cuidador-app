@@ -142,8 +142,23 @@ with abas[0]:
         st.markdown(f"🕒 Data do Registro: **{data}**")
 
         temperatura_str = st.text_input("Temperatura (°C)", placeholder="Ex: 36,5")
-        # ➕ Campo de saturação de oxigênio
         saturacao = st.number_input("Saturação de oxigênio (%)", min_value=50, max_value=100, step=1)
+        frequencia_cardiaca = st.number_input("Frequência Cardíaca (bpm)", min_value=30, max_value=200, step=1)
+
+        # Eliminações intestinais
+        quant_feze = st.selectbox("Quantidade de evacuações (fezes) no dia", ["0", "1", "2", "3", "4", "5", "6", "7", "8", "9", "10"])
+        caract_feze = st.selectbox(
+            "Característica das fezes",
+            ["Normal", "Pastoso", "Diarreia", "Fecaloma"]
+        )
+
+        # Eliminações vesicais
+        quant_urina = st.selectbox("Quantidade de micções (urina) no dia", ["0", "1", "2", "3", "4", "5", "6", "7", "8", "9", "10"])
+        aspecto_urina = st.selectbox(
+            "Aspecto da urina",
+            ["Normal", "Escura", "Clara", "Com odor forte", "Com sangue", "Com pus", "Outro"]
+        )
+
         opcoes_sono = [f"{h}h {m}min" if m > 0 else f"{h}h" for h in range(3, 13) for m in [0, 30]]
         sono = st.selectbox("Horas de Sono", opcoes_sono)
         pressao = st.text_input("Pressão Arterial (ex: 120x80)")
@@ -176,12 +191,17 @@ with abas[0]:
                 novo_registro = {
                     "data": data,
                     "temperatura": temperatura,
-                    "saturacao": saturacao,  # ➕ Inclui saturação
+                    "saturacao": saturacao,
+                    "frequencia_cardiaca": frequencia_cardiaca,
                     "pressao": pressao,
                     "sono": sono,
                     "observacao": observacao,
                     "cuidador": cuidador,
-                    "observacao_geral": observacao_geral
+                    "observacao_geral": observacao_geral,
+                    "quantidade_feze": quant_feze,
+                    "caracteristica_feze": caract_feze,
+                    "quantidade_urina": quant_urina,
+                    "aspecto_urina": aspecto_urina
                 }
                 resultado = supabase.table("registros_diarios").insert(novo_registro).execute()
                 registro_id = resultado.data[0]["id"]
