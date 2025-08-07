@@ -46,7 +46,7 @@ def login_page():
                 st.session_state["usuario"] = result.user
                 st.session_state["token_processado"] = True
                 st.success("✅ Login realizado com sucesso!")
-                st.experimental_rerun()
+                st.rerun()
             except Exception as e:
                 st.error("Erro ao fazer login: " + str(e))
 
