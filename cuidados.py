@@ -34,7 +34,7 @@ if token and not st.session_state.get("token_processado", False):
 
 # --- Função de login com cadastro ---
 def login_page():
-    st.title("🔐 Login no Sistema de Cuidados")
+    st.title("🔐 Login no Sistema de Cuidador (Fernando Paiva)")
     aba = st.radio("Acesso:", ["Entrar", "Cadastrar novo usuário"])
 
     if aba == "Entrar":
@@ -67,7 +67,10 @@ if st.session_state["usuario"] is None:
 
 
 # 🩺 Título principal
-st.title("🩺 Sistema de Cuidados - Protótipo")
+st.title("🩺 Sistema de monitoramento para Cuidadores de Fernando Paiva")
+
+# ℹ️ Aviso com letra menor
+st.markdown("<small><i>Este sistema é exclusivo para uso interno da equipe de cuidados da Fundação Fernando Paiva.</i></small>", unsafe_allow_html=True)
 
 # 🔗 Carregando dados reais das tabelas Supabase
 def carregar_tabela(nome):
@@ -124,7 +127,9 @@ abas = st.tabs(["📋 Registros Diários", "🧑‍⚕️ Cuidadores", "💊 Med
 
 # 📋 REGISTROS DIÁRIOS
 with abas[0]:
-    st.header("📋 Visualizar Registros Diários")
+    st.header("📋Registros Diários")
+    st.markdown("Os registros diários de cuidados fica abaixo da página"
+    "caso veja algum erro avise a Durval com prints.")
     st.divider()
     st.subheader("➕ Adicionar Novo Registro Diário")
 
@@ -202,6 +207,7 @@ with abas[0]:
 # 🧑‍⚕️ CUIDADORES
 with abas[1]:
     st.subheader("Cadastro de Cuidadores")
+    st.markdown("faça o seu cadastro aqui por favor.")
 
     with st.form(key="form_cuidadores"):
         nome = st.text_input("Nome do Cuidador")
@@ -233,6 +239,9 @@ with abas[1]:
 # 💊 MEDICAMENTOS
 with abas[2]:
     st.subheader("Registro de Medicamentos")
+    st.markdown("os medicamentos são cadastrados aqui e inseridos no registro diário"
+    " aqui voce pode consultar abaixo a lista de medicamentos cadastrados "
+    "cuidado ao preencher.")
 
     with st.form("form_medicamentos"):
         cuidador_nome = st.selectbox("Cuidador Responsável", df_cuidadores["nome"].tolist())
