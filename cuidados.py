@@ -149,7 +149,7 @@ with abas[0]:
         quant_feze = st.selectbox("Quantidade de evacuações (fezes) no dia", ["0", "1", "2", "3", "4", "5", "6", "7", "8", "9", "10"])
         caract_feze = st.selectbox(
             "Característica das fezes",
-            ["Normal", "Pastoso", "Diarreia", "Fecaloma"]
+            ["Normal(Fecaloma)", "Pastoso", "Diarreia"]
         )
 
         # Eliminações vesicais
