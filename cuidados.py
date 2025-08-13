@@ -65,7 +65,6 @@ if st.session_state["usuario"] is None:
     login_page()
     st.stop()
 
-
 # 🩺 Título principal
 st.title("🩺 Sistema de monitoramento para Cuidadores de Fernando Paiva")
 
@@ -89,39 +88,6 @@ df_cuidadores = carregar_tabela("cuidadores")
 df_medicamentos = carregar_tabela("medicamentos")
 df_alimentacao = carregar_tabela("alimentacao")
 
-# 🔍 Sidebar para filtros de registros
-st.sidebar.title("🔍 Filtros de Registros Diários Quadro Geral")
-
-if df_registros.empty:
-    st.sidebar.warning("⚠️ Nenhum dado encontrado na tabela 'registros_diarios'.")
-else:
-    colunas_registros = list(df_registros.columns)
-
-    colunas_selecionadas = st.sidebar.multiselect(
-        "🔽 Colunas visíveis:",
-        colunas_registros,
-        default=colunas_registros,
-        key="multiselect_colunas_visiveis"
-    )
-
-    col1, col2 = st.sidebar.columns(2)
-
-    col_filtro = col1.selectbox(
-        "🎯 Filtrar por:",
-        [c for c in colunas_registros if c != 'id'],
-        key="selectbox_filtro_coluna"
-    )
-
-    valor_filtro = col2.selectbox(
-        "🧮 Valor:",
-        df_registros[col_filtro].unique(),
-        key="selectbox_valor_filtro"
-    )
-
-# ADICIONE ESTES BOTÕES:
-    status_filtrar = col1.button("🔍 Filtrar", key="btn_filtrar")
-    status_limpar = col2.button("🔹 Limpar", key="btn_limpar")
-
 abas = st.tabs(["📋 Registros Diários", "🧑‍⚕️ Cuidadores", "💊 Medicamentos", "🍽️ Alimentação"])
 
 
@@ -138,7 +104,7 @@ with abas[0]:
         st.markdown(f"👤 Paciente: **{paciente}**")
 
         from datetime import datetime
-        data = datetime.now().strftime("%d-%m-%Y %H:%M:%S")
+        data = datetime.now().strftime("%Y-%m-%d")
         st.markdown(f"🕒 Data do Registro: **{data}**")
 
         temperatura_str = st.text_input("Temperatura (°C)", placeholder="Ex: 36,5")
@@ -149,7 +115,7 @@ with abas[0]:
         quant_feze = st.selectbox("Quantidade de evacuações (fezes) no dia", ["0", "1", "2", "3", "4", "5", "6", "7", "8", "9", "10"])
         caract_feze = st.selectbox(
             "Característica das fezes",
-            ["Normal(Fecaloma)", "Pastoso", "Diarreia"]
+            ["Normal (Fecaloma)", "Pastoso", "Diarreia"]
         )
 
         # Eliminações vesicais
@@ -213,16 +179,50 @@ with abas[0]:
 
                 st.success("✅ Registro diário salvo com sucesso e medicamentos vinculados!")
 
-    # Exibição dos registros
-    if not df_registros.empty:
+    # 🔍 Filtros dos registros diários
+    st.divider()
+    st.subheader("🔍 Filtros de Registros Diários")
+
+    if df_registros.empty:
+        st.warning("⚠️ Nenhum dado encontrado na tabela 'registros_diarios'.")
+    else:
+        # Remover colunas indesejadas para exibição
+        colunas_ocultas = ["id", "created_at", "cuidador_id"]
+        df_registros_visivel = df_registros.drop(columns=colunas_ocultas, errors="ignore")
+        colunas_registros = list(df_registros_visivel.columns)
+
+        colunas_selecionadas = st.multiselect(
+            "🔽 Colunas visíveis:",
+            colunas_registros,
+            default=colunas_registros,
+            key="multiselect_colunas_visiveis"
+        )
+
+        col1, col2 = st.columns(2)
+
+        col_filtro = col1.selectbox(
+            "🎯 Filtrar por:",
+            colunas_registros,
+            key="selectbox_filtro_coluna"
+        )
+
+        valor_filtro = col2.selectbox(
+            "🧮 Valor:",
+            df_registros_visivel[col_filtro].unique(),
+            key="selectbox_valor_filtro"
+        )
+
+        col3, col4 = st.columns(2)
+        status_filtrar = col3.button("🔍 Filtrar", key="btn_filtrar")
+        status_limpar = col4.button("🔹 Limpar", key="btn_limpar")
+
+        # Exibição dos registros
         if status_filtrar and col_filtro:
-            df_exibir = df_registros[df_registros[col_filtro] == valor_filtro]
+            df_exibir = df_registros_visivel[df_registros_visivel[col_filtro] == valor_filtro]
         else:
-            df_exibir = df_registros.copy()
+            df_exibir = df_registros_visivel.copy()
 
         st.dataframe(df_exibir[colunas_selecionadas])
-    else:
-        st.warning("Nenhum registro disponível.")
 
 # 🧑‍⚕️ CUIDADORES
 with abas[1]:
@@ -252,7 +252,10 @@ with abas[1]:
     st.divider()
     st.subheader("Lista de Cuidadores Registrados")
     if not df_cuidadores.empty:
-        st.dataframe(df_cuidadores)
+        # Remover colunas indesejadas
+        colunas_ocultas_cuidadores = ["id", "created_at", "vinculo"]
+        df_cuidadores_visivel = df_cuidadores.drop(columns=colunas_ocultas_cuidadores, errors="ignore")
+        st.dataframe(df_cuidadores_visivel)
     else:
         st.info("Nenhum cuidador cadastrado ainda.")
 
@@ -296,11 +299,11 @@ with abas[2]:
     df_medicamentos = pd.DataFrame(dados_medicamentos.data)
 
     # 🧹 Remover colunas indesejadas
-    colunas_ocultas = ["id", "cuidador_id"]
-    df_visivel = df_medicamentos.drop(columns=colunas_ocultas, errors="ignore")
+    colunas_ocultas_medicamentos = ["id", "cuidador_id", "created_at", "registro_id"]
+    df_medicamentos_visivel = df_medicamentos.drop(columns=colunas_ocultas_medicamentos, errors="ignore")
 
-    if not df_visivel.empty:
-        st.dataframe(df_visivel)
+    if not df_medicamentos_visivel.empty:
+        st.dataframe(df_medicamentos_visivel)
     else:
         st.info("Nenhum medicamento registrado ainda.")
        
@@ -343,11 +346,11 @@ with abas[3]:
     df_refeicoes = pd.DataFrame(dados_refeicoes.data)
 
     # 🧹 Remover colunas indesejadas
-    colunas_ocultas = ["id", "cuidador_id"]
-    df_visivel = df_refeicoes.drop(columns=colunas_ocultas, errors="ignore")
+    colunas_ocultas_alimentacao = ["id", "cuidador_id"]
+    df_refeicoes_visivel = df_refeicoes.drop(columns=colunas_ocultas_alimentacao, errors="ignore")
 
-    if not df_visivel.empty:
-        st.dataframe(df_visivel)
+    if not df_refeicoes_visivel.empty:
+        st.dataframe(df_refeicoes_visivel)
     else:
         st.info("Nenhum registro de alimentação ainda.")
 
