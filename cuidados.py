@@ -64,6 +64,11 @@ def login_page():
 if st.session_state.get("usuario") is None:
     login_page()
     st.stop()
+else:
+    supabase.auth.set_session(
+        st.session_state["usuario"].access_token,
+        st.session_state["usuario"].refresh_token
+    )
 
 # 🩺 Título principal
 st.title("🩺 Sistema de monitoramento para Cuidadores de Fernando Paiva")
