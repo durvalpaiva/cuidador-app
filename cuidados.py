@@ -313,31 +313,34 @@ with abas[3]:
     st.subheader("Registro de Refeições")
 
     with st.form("form_alimentacao"):
-        cuidador_nome = st.selectbox("Cuidador Responsável", df_cuidadores["nome"].tolist())
-        refeicao = st.selectbox("Tipo de Refeição", ["Café da Manhã", "Almoço", "Lanche", "Jantar", "Ceia"])
-        alimentos = st.text_area("Alimentos Oferecidos")
-        quantidade = st.text_input("Quantidade Aproximada")
-        aceitou = st.radio("Aceitação da refeição:", ["Sim", "Parcialmente", "Recusou"])
-        horario = st.time_input("Horário da Refeição", value=time(12, 0))
-        observacoes = st.text_area("Observações adicionais")
+        if not df_cuidadores.empty and "nome" in df_cuidadores.columns:
+            cuidador_nome = st.selectbox("Cuidador Responsável", df_cuidadores["nome"].tolist())
+            refeicao = st.selectbox("Tipo de Refeição", ["Café da Manhã", "Almoço", "Lanche", "Jantar", "Ceia"])
+            alimentos = st.text_area("Alimentos Oferecidos")
+            quantidade = st.text_input("Quantidade Aproximada")
+            aceitou = st.radio("Aceitação da refeição:", ["Sim", "Parcialmente", "Recusou"])
+            horario = st.time_input("Horário da Refeição", value=time(12, 0))
+            observacoes = st.text_area("Observações adicionais")
 
-        salvar_refeicao = st.form_submit_button("Salvar Refeição")
+            salvar_refeicao = st.form_submit_button("Salvar Refeição")
 
-        if salvar_refeicao and cuidador_nome:
-            cuidador_id = df_cuidadores[df_cuidadores["nome"] == cuidador_nome]["id"].values[0]
+            if salvar_refeicao and cuidador_nome:
+                cuidador_id = df_cuidadores[df_cuidadores["nome"] == cuidador_nome]["id"].values[0]
 
-            novo = {
-                "refeicao": refeicao,
-                "alimentos": alimentos,
-                "quantidade": quantidade,
-                "aceitou": aceitou,
-                "horario": horario.strftime("%H:%M"),
-                "responsavel": cuidador_nome,
-                "cuidador_id": cuidador_id,
-                "observacoes": observacoes
-            }
-            supabase.table("alimentacao").insert(novo).execute()
-            st.success(f"Refeição registrada: {refeicao} às {horario.strftime('%H:%M')} 🕒")
+                novo = {
+                    "refeicao": refeicao,
+                    "alimentos": alimentos,
+                    "quantidade": quantidade,
+                    "aceitou": aceitou,
+                    "horario": horario.strftime("%H:%M"),
+                    "responsavel": cuidador_nome,
+                    "cuidador_id": cuidador_id,
+                    "observacoes": observacoes
+                }
+                supabase.table("alimentacao").insert(novo).execute()
+                st.success(f"Refeição registrada: {refeicao} às {horario.strftime('%H:%M')} 🕒")
+        else:
+            st.warning("Cadastre pelo menos um cuidador para registrar refeições.")
 
     # 📊 Mostrar todas as refeições registradas
     st.divider()
