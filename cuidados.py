@@ -267,30 +267,30 @@ with abas[2]:
     "cuidado ao preencher.")
 
     with st.form("form_medicamentos"):
-        cuidador_nome = st.selectbox("Cuidador Responsável", df_cuidadores["nome"].tolist())
-        nome_medicamento = st.text_input("Nome do Medicamento")
-        dosagem = st.text_input("Dosagem")
-        frequencia = st.selectbox("Frequência", ["1x ao dia", "2x ao dia", "3x ao dia", "A cada 8h", "Sob demanda"])
-        horario = st.time_input("Horário de Administração", value=time(8, 0))
-        observacoes = st.text_area("Observações Adicionais")
+        if not df_cuidadores.empty and "nome" in df_cuidadores.columns:
+            cuidador_nome = st.selectbox("Cuidador Responsável", df_cuidadores["nome"].tolist())
+            nome_medicamento = st.text_input("Nome do Medicamento")
+            dosagem = st.text_input("Dosagem")
+            frequencia = st.selectbox("Frequência", ["1x ao dia", "2x ao dia", "3x ao dia", "A cada 8h", "Sob demanda"])
+            horario = st.time_input("Horário de Administração", value=time(8, 0))
+            observacoes = st.text_area("Observações Adicionais")
 
-        salvar_med = st.form_submit_button("Salvar Medicamento")
+            salvar_med = st.form_submit_button("Salvar Medicamento")
 
-        if salvar_med and nome_medicamento and cuidador_nome:
-            # 🔗 Buscar o ID do cuidador
-            cuidador_id = df_cuidadores[df_cuidadores["nome"] == cuidador_nome]["id"].values[0]
-
-            # 💾 Inserir medicamento diretamente
-            novo = {
-                "nome": nome_medicamento,
-                "dosagem": dosagem,
-                "frequencia": frequencia,
-                "horario": horario.strftime("%H:%M"),
-                "cuidador_id": cuidador_id,
-                "observacoes": observacoes
-            }
-            supabase.table("medicamentos").insert(novo).execute()
-            st.success(f"Medicamento {nome_medicamento} registrado com sucesso! ✅")
+            if salvar_med and nome_medicamento and cuidador_nome:
+                cuidador_id = df_cuidadores[df_cuidadores["nome"] == cuidador_nome]["id"].values[0]
+                novo = {
+                    "nome": nome_medicamento,
+                    "dosagem": dosagem,
+                    "frequencia": frequencia,
+                    "horario": horario.strftime("%H:%M"),
+                    "cuidador_id": cuidador_id,
+                    "observacoes": observacoes
+                }
+                supabase.table("medicamentos").insert(novo).execute()
+                st.success(f"Medicamento {nome_medicamento} registrado com sucesso! ✅")
+        else:
+            st.warning("Cadastre pelo menos um cuidador para registrar medicamentos.")
 
     # 📊 Mostrar todos os medicamentos registrados
     st.markdown("### Medicamentos Registrados")
