@@ -88,7 +88,7 @@ def carregar_tabela(nome):
         return pd.DataFrame()
 
 df_registros = carregar_tabela("registros_diarios")
-st.write("Dados retornados:", df_registros)
+# st.write("Dados retornados:", df_registros)  # Removido para produção
 if not df_registros.empty and "data" in df_registros.columns:
     df_registros["data"] = pd.to_datetime(df_registros["data"]).dt.strftime("%d/%m/%Y")
 
