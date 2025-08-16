@@ -61,9 +61,13 @@ def login_page():
                 st.error("Erro ao cadastrar: " + str(e))
 
 # --- Verificação de login ---
-if st.session_state["usuario"] is None:
-    login_page()
-    st.stop()
+if st.session_state.get("usuario") is None:
+    st.warning("Usuário não está logado!")
+else:
+    st.success(f"Usuário logado: {st.session_state['usuario']}")
+
+login_page()
+st.stop()
 
 # 🩺 Título principal
 st.title("🩺 Sistema de monitoramento para Cuidadores de Fernando Paiva")
