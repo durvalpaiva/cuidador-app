@@ -62,12 +62,8 @@ def login_page():
 
 # --- Verificação de login ---
 if st.session_state.get("usuario") is None:
-    st.warning("Usuário não está logado!")
-else:
-    st.success(f"Usuário logado: {st.session_state['usuario']}")
-
-login_page()
-st.stop()
+    login_page()
+    st.stop()
 
 # 🩺 Título principal
 st.title("🩺 Sistema de monitoramento para Cuidadores de Fernando Paiva")
