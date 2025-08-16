@@ -132,7 +132,10 @@ with abas[0]:
         observacao = st.text_area("Observação comportamental e de saúde do paciente")
         observacao_geral = st.text_area("Observação de entrada e saída do cuidador")
 
-        nomes_cuidadores = df_cuidadores["nome"].unique().tolist() if not df_cuidadores.empty else []
+        if not df_cuidadores.empty and "nome" in df_cuidadores.columns:
+            nomes_cuidadores = df_cuidadores["nome"].unique().tolist()
+        else:
+            nomes_cuidadores = []
         cuidador = st.selectbox("Cuidador Responsável", nomes_cuidadores)
 
         # 🔍 Buscar medicamentos disponíveis
