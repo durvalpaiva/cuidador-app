@@ -44,6 +44,8 @@ def login_page():
             try:
                 result = supabase.auth.sign_in_with_password({"email": email, "password": senha})
                 st.session_state["usuario"] = result.user
+                st.session_state["access_token"] = result.session.access_token
+                st.session_state["refresh_token"] = result.session.refresh_token
                 st.session_state["token_processado"] = True
                 st.success("✅ Login realizado com sucesso!")
                 st.rerun()
@@ -66,8 +68,8 @@ if st.session_state.get("usuario") is None:
     st.stop()
 else:
     supabase.auth.set_session(
-        st.session_state["usuario"].access_token,
-        st.session_state["usuario"].refresh_token
+        st.session_state["access_token"],
+        st.session_state["refresh_token"]
     )
 
 # 🩺 Título principal
