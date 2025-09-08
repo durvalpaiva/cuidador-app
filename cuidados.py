@@ -96,7 +96,7 @@ df_cuidadores = carregar_tabela("cuidadores")
 df_medicamentos = carregar_tabela("medicamentos")
 df_alimentacao = carregar_tabela("alimentacao")
 
-abas = st.tabs(["📋 Registros Diários", "🧑‍⚕️ Cuidadores", "💊 Medicamentos", "🍽️ Alimentação"])
+abas = st.tabs(["📋 Registros Diários", "🧑‍⚕️ Cuidadores", "💊 Medicamentos", "🍽️ Alimentação", "🏃 Fisioterapia"])
 
 
 # 📋 REGISTROS DIÁRIOS
@@ -367,4 +367,139 @@ with abas[3]:
         st.dataframe(df_refeicoes_visivel)
     else:
         st.info("Nenhum registro de alimentação ainda.")
+
+# 🏃 FISIOTERAPIA
+with abas[4]:
+    st.subheader("🏃 Registro de Fisioterapia")
+    st.markdown("Registre as sessões de fisioterapia de Fernando Paiva aqui.")
+    
+    with st.form("form_fisioterapia"):
+        col1, col2 = st.columns(2)
+        
+        with col1:
+            st.markdown("### 📝 Informações da Sessão")
+            data_sessao = st.date_input("Data da Sessão")
+            
+            if not df_cuidadores.empty and "nome" in df_cuidadores.columns:
+                fisioterapeuta = st.selectbox("Fisioterapeuta/Cuidador Responsável", df_cuidadores["nome"].tolist())
+            else:
+                fisioterapeuta = st.text_input("Nome do Fisioterapeuta")
+            
+            st.markdown("### 🏃‍♂️ Atividades Realizadas")
+            exercicios = st.text_area("Exercícios Realizados", height=100)
+            treino_marcha = st.text_area("Treino de Marcha", height=80)
+            equilibrio = st.text_area("Exercícios de Equilíbrio", height=80)
+            coordenacao = st.text_area("Exercícios de Coordenação", height=80)
+            
+            st.markdown("### 🎯 Prescrição Domiciliar")
+            exercicios_domiciliares = st.text_area("Exercícios para Casa", height=100)
+            
+        with col2:
+            st.markdown("### 🩺 Avaliação Clínica")
+            
+            # Grau de dor
+            grau_dor = st.slider("Grau de Dor (0-10)", min_value=0, max_value=10, value=0)
+            
+            # Força muscular
+            forca_muscular = st.selectbox("Força Muscular (Escala Oxford)", 
+                                        ["0 - Sem contração", "1 - Contração palpável", 
+                                         "2 - Movimento sem gravidade", "3 - Movimento contra gravidade", 
+                                         "4 - Movimento contra resistência leve", "5 - Força normal"])
+            
+            # Mobilidade articular
+            amplitude_movimento = st.text_area("Amplitude de Movimento (ROM)", height=80)
+            
+            # Espasticidade
+            espasticidade = st.selectbox("Espasticidade/Tônus", 
+                                       ["Normal", "Leve", "Moderada", "Grave"])
+            
+            # Capacidade funcional
+            capacidade_funcional = st.text_area("Atividades de Vida Diária (AVDs)", height=80)
+            
+            st.markdown("### 📊 Quadro Geral")
+            estabilidade_motora = st.selectbox("Estabilidade Motora", 
+                                             ["Estável", "Melhora", "Declínio", "Instável"])
+            quadro_clinico = st.text_area("Quadro Clínico Motor", height=80)
+        
+        st.markdown("### 📋 Observações e Evolução")
+        col3, col4 = st.columns(2)
+        
+        with col3:
+            observacoes_paciente = st.text_area("Observações do Paciente", height=100)
+            intercorrencias = st.text_area("Intercorrências (quedas, eventos adversos)", height=80)
+            
+        with col4:
+            evolucao_tratamento = st.text_area("Evolução do Tratamento", height=100)
+            metas_terapeuticas = st.text_area("Metas Terapêuticas", height=80)
+            
+        recomendacoes_familia = st.text_area("Recomendações para Familiares/Cuidadores", height=100)
+        
+        salvar_fisio = st.form_submit_button("💾 Salvar Registro de Fisioterapia")
+    
+        if salvar_fisio and fisioterapeuta:
+            if not df_cuidadores.empty and fisioterapeuta in df_cuidadores["nome"].values:
+                cuidador_id = df_cuidadores[df_cuidadores["nome"] == fisioterapeuta]["id"].values[0]
+            else:
+                cuidador_id = None
+            
+            novo_registro_fisio = {
+                "data_sessao": data_sessao.strftime("%Y-%m-%d"),
+                "fisioterapeuta": fisioterapeuta,
+                "exercicios": exercicios,
+                "treino_marcha": treino_marcha,
+                "equilibrio": equilibrio,
+                "coordenacao": coordenacao,
+                "exercicios_domiciliares": exercicios_domiciliares,
+                "grau_dor": grau_dor,
+                "forca_muscular": forca_muscular,
+                "amplitude_movimento": amplitude_movimento,
+                "espasticidade": espasticidade,
+                "capacidade_funcional": capacidade_funcional,
+                "estabilidade_motora": estabilidade_motora,
+                "quadro_clinico": quadro_clinico,
+                "observacoes_paciente": observacoes_paciente,
+                "intercorrencias": intercorrencias,
+                "evolucao_tratamento": evolucao_tratamento,
+                "metas_terapeuticas": metas_terapeuticas,
+                "recomendacoes_familia": recomendacoes_familia,
+                "cuidador_id": cuidador_id
+            }
+            
+            try:
+                supabase.table("fisioterapia").insert(novo_registro_fisio).execute()
+                st.success(f"✅ Registro de fisioterapia salvo com sucesso! Data: {data_sessao}")
+            except Exception as e:
+                st.error(f"Erro ao salvar registro: {e}")
+    
+    st.divider()
+    st.subheader("📊 Histórico de Fisioterapia")
+    
+    # Carregar dados reais da tabela fisioterapia
+    try:
+        dados_fisioterapia = supabase.table("fisioterapia").select("*").order("data_sessao", desc=True).execute()
+        df_fisioterapia = pd.DataFrame(dados_fisioterapia.data)
+        
+        if not df_fisioterapia.empty:
+            # Remover colunas indesejadas
+            colunas_ocultas_fisio = ["id", "cuidador_id", "created_at"]
+            df_fisioterapia_visivel = df_fisioterapia.drop(columns=colunas_ocultas_fisio, errors="ignore")
+            
+            # Formatar data para exibição
+            if "data_sessao" in df_fisioterapia_visivel.columns:
+                df_fisioterapia_visivel["data_sessao"] = pd.to_datetime(df_fisioterapia_visivel["data_sessao"]).dt.strftime("%d/%m/%Y")
+            
+            st.dataframe(df_fisioterapia_visivel)
+            
+            # Gráfico de evolução da dor se houver dados
+            if len(df_fisioterapia) > 1:
+                st.markdown("### 📈 Evolução do Grau de Dor")
+                df_dor = df_fisioterapia[["data_sessao", "grau_dor"]].copy()
+                df_dor["data_sessao"] = pd.to_datetime(df_dor["data_sessao"])
+                df_dor = df_dor.sort_values("data_sessao")
+                st.line_chart(df_dor.set_index("data_sessao"))
+        else:
+            st.info("Nenhum registro de fisioterapia ainda.")
+            
+    except Exception as e:
+        st.warning(f"Tabela 'fisioterapia' não encontrada. Será criada automaticamente no primeiro registro.")
 
