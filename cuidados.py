@@ -76,7 +76,7 @@ else:
 st.title("🩺 Sistema de monitoramento para Cuidadores de Fernando Paiva")
 
 # ℹ️ Aviso com letra menor
-st.markdown("<small><i>Este sistema é exclusivo para uso interno da equipe de cuidados da Fundação Fernando Paiva.</i></small>", unsafe_allow_html=True)
+st.markdown("<small><i>Este sistema é exclusivo para uso interno da equipe de cuidados de Fernando Paiva.</i></small>", unsafe_allow_html=True)
 
 # 🔗 Carregando dados reais das tabelas Supabase
 def carregar_tabela(nome):
